@@ -5,6 +5,8 @@ Current LXD stores the following kind of configurations:
 
 The server configuration is a simple set of key and values.
 
+The server configuration file is located in /path/to/lxd.conf (etc.)
+
 The container configuration is a bit more complex as it uses both
 key/value configuration and some more complex configuration structures
 for devices, network interfaces and storage volumes.
