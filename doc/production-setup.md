@@ -77,4 +77,81 @@ You can add for ex.: `up ip link set eth0 txqueuelen 10000` to your interface co
 10000 txqueuelen value commonly used with 10GbE NICs. Basically small txqueuelen values used with slow devices with a high latency, and higher with devices with low latency. I personally have like 3-5% improvement with these settings for local (host with container, container vs container) and internet connections. Good thing about txqueuelen value tweak, the more containers you use, the more you can be can benefit from this tweak. And you can always temporary set this values and check this tweak in your environment without lxd host reboot.
 
 
+## Ansible Playbook
+This is an example playbook for the suggested changes above.
 
+```yaml
+-----
+- hosts: hypervisor
+  tasks:
+
+  - name: sysctl - fs.inotify.max_queued_events
+    sysctl:
+      name: fs.inotify.max_queued_events
+      value: 1048576
+      state: present
+      reload: yes
+
+  - name: sysctl - fs.inotify.max_user_instances
+    sysctl:
+      name: fs.inotify.max_user_instances
+      value: 1048576
+      state: present
+      reload: yes
+
+  - name: sysctl - fs.inotify.max_user_watches
+    sysctl:
+      name: fs.inotify.max_user_watches
+      value: 1048576
+      state: present
+      reload: yes
+
+  - name: sysctl - vm.max_map_count
+    sysctl:
+      name: vm.max_map_count
+      value: 262144
+      state: present
+      reload: yes
+
+  - name: Limits -  *  soft  nofile
+    pam_limits:
+      domain: '*'
+      limit_type: soft
+      limit_item: nofile
+      value: 1048576
+
+  - name: Limits -  *  hard  nofile
+    pam_limits:
+      domain: '*'
+      limit_type: hard
+      limit_item: nofile
+      value: 1048576
+
+  - name: Limits -  root  soft  nofile
+    pam_limits:
+      domain: root
+      limit_type: soft
+      limit_item: nofile
+      value: 1048576
+
+  - name: Limits -  root  hard  nofile
+    pam_limits:
+      domain: root
+      limit_type: hard
+      limit_item: nofile
+      value: 1048576
+
+  - name: Limits -  *  soft  memlock
+    pam_limits:
+      domain: '*'
+      limit_type: soft
+      limit_item: memlock
+      value: unlimited
+
+  - name: Limits -  *  hard  memlock
+    pam_limits:
+      domain: '*'
+      limit_type: hard
+      limit_item: memlock
+      value: unlimited
+```
